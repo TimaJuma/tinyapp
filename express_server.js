@@ -17,26 +17,30 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDB);
 });
 
-
 app.get('/urls', (req, res) => {
   let tempVar = {urls: urlDB};
   res.render('urls_index', tempVar)
 })
 
 
-app.get('/hello', (req, res)=> {
-  res.send('<h1>Hello There!</h1>\n')
-});
+app.get('/urls/:shortURL', (req, res) => {
+  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL]}
+  res.render('urls_show', tempVar)
+})
+
+// app.get('/hello', (req, res)=> {
+//   res.send('<h1>Hello There!</h1>\n')
+// });
 
 
-app.get("/set", (req, res) => {
-  const a = 10;
-  res.send(`a = ${a}`);
-});
+// app.get("/set", (req, res) => {
+//   const a = 10;
+//   res.send(`a = ${a}`);
+// });
 
-app.get('/fetch', (req, res) => {
-  res.send(`a = ${a}`);
-});
+// app.get('/fetch', (req, res) => {
+//   res.send(`a = ${a}`);
+// });
 
 
 
