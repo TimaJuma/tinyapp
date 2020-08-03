@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 4040;
+const PORT = 8080;
 
 const urlDB = {
   "xxc2y" : "https://www.lighthouselabs.ca",
