@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
-const PORT = 8080;
+const PORT = 4040;
+
+app.set('view engine', 'ejs');
 
 const urlDB = {
   "xxc2y" : "https://www.lighthouselabs.ca",
@@ -14,6 +16,12 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDB);
 });
+
+
+app.get('/urls', (req, res) => {
+  let tempVar = {urls: urlDB};
+  res.render('urls_index', tempVar)
+})
 
 
 app.get('/hello', (req, res)=> {
