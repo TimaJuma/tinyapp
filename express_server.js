@@ -60,6 +60,12 @@ app.get('/urls/:shortURL', (req, res) => {
 })
 
 
+// when short URL requested, redirect user to actual long URL/site
+app.get("/u/:shortURL", (req,res) => {
+  const longURL = urlDB[req.params.shortURL]
+  console.log(longURL);
+  res.redirect(longURL);
+})
 
 
 console.log('Will listen to PORT');
@@ -67,6 +73,17 @@ app.listen(PORT, ()=>{
   console.log(`Now I listen PORT" ${PORT}`);
 });
 
+
+
+// DELETE url from the list stored i object
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const shortURLtoDel = req.params.shortURL;
+  delete urlDB[shortURLtoDel];
+  res.redirect('/urls')
+})
+
+
+//========== HELPER FUNCTIONS==========================
 
 // GENERATE STRING
 // the string will be generated based on listed characters with a length of 6 charaters
