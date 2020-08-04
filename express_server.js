@@ -2,8 +2,16 @@ const express = require('express');
 const app = express();
 const PORT = 4040;
 
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
+
+// templating engine
 app.set('view engine', 'ejs');
 
+
+
+// url object which will store short ULR versions
 const urlDB = {
   "xxc2y" : "https://www.lighthouselabs.ca",
   "9m5xk" : "https://www.google.com"
@@ -22,30 +30,34 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', tempVar)
 })
 
+// new URL with submission form
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
 
+
+//on form submit via POST
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  res.send('Ok');
+})
+
+// dynamic URL form URL DB/object
 app.get('/urls/:shortURL', (req, res) => {
   let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL]}
   res.render('urls_show', tempVar)
 })
 
-// app.get('/hello', (req, res)=> {
-//   res.send('<h1>Hello There!</h1>\n')
-// });
-
-
-// app.get("/set", (req, res) => {
-//   const a = 10;
-//   res.send(`a = ${a}`);
-// });
-
-// app.get('/fetch', (req, res) => {
-//   res.send(`a = ${a}`);
-// });
 
 
 
 console.log('Will listen to PORT');
 app.listen(PORT, ()=>{
   console.log(`Now I listen PORT" ${PORT}`);
-})
+});
+
+
+function generateRandomString() {
+  
+}
 
