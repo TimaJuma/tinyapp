@@ -38,8 +38,19 @@ app.get("/urls/new", (req, res) => {
 
 //on form submit via POST
 app.post('/urls', (req, res) => {
-  console.log(req.body);
-  res.send('Ok');
+  //get longURL from from submitted form and generate shortURL
+  const longURL= req.body.longURL;
+  const shortURL = generateRandomString()
+  
+  //update URLDB object, where all URLs are stored
+  urlDB[shortURL] = longURL;
+  console.log(req.body.longURL);
+  console.log(urlDB);
+  // res.send('Ok');
+
+  //redirect to the newly generated shortURL
+  //res.redirect(`/urls/${shortURL}`);
+  res.redirect('/urls');
 })
 
 // dynamic URL form URL DB/object
