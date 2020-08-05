@@ -17,8 +17,13 @@ const urlDB = {
   "9m5xk" : "https://www.google.com"
 };
 
+
+// MAIN FUNCTIONALITY
+
+
+// MAIN PAGE
 app.get("/", (req, res) => {
-  res.send('Hi there!');
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -29,6 +34,7 @@ app.get('/urls', (req, res) => {
   let tempVar = {urls: urlDB};
   res.render('urls_index', tempVar)
 })
+
 
 // new URL with submission form
 app.get("/urls/new", (req, res) => {
@@ -44,14 +50,14 @@ app.post('/urls', (req, res) => {
   
   //update URLDB object, where all URLs are stored
   urlDB[shortURL] = longURL;
-  console.log(req.body.longURL);
-  console.log(urlDB);
+  //console.log(req.body.longURL);
+  //console.log(urlDB);
   // res.send('Ok');
-
   //redirect to the newly generated shortURL
   //res.redirect(`/urls/${shortURL}`);
   res.redirect('/urls');
 })
+
 
 // dynamic URL form URL DB/object
 app.get('/urls/:shortURL', (req, res) => {
@@ -68,10 +74,15 @@ app.get("/u/:shortURL", (req,res) => {
 })
 
 
-console.log('Will listen to PORT');
-app.listen(PORT, ()=>{
-  console.log(`Now I listen PORT" ${PORT}`);
-});
+
+// handle POST request to UPDATE longURL by redirecting to dedicated URL info page
+app.post('/urls/:id', (req, res) => {
+  const shortURL = req.params.id
+  const longURL = req.body.longURL
+  console.log('longB', longURL)
+  urlDB[shortURL] = longURL;
+  res.redirect(`/urls`);
+})
 
 
 
@@ -81,6 +92,15 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDB[shortURLtoDel];
   res.redirect('/urls')
 })
+
+
+
+
+//Inform user that the server is on and listens at particular port
+console.log('Will listen to PORT');
+app.listen(PORT, ()=>{
+  console.log(`Now I listen PORT" ${PORT}`);
+});
 
 
 //========== HELPER FUNCTIONS==========================
