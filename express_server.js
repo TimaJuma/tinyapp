@@ -2,6 +2,7 @@
 // 1. Move helpers function to seperate file
 // 2. clean code from console.logs
 // 3. reorganize routers
+// 4. login form in / route
 
 
 
