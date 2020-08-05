@@ -1,12 +1,17 @@
+// IMPORT ALL MODULES
 const express = require('express');
-const app = express();
+
 const PORT = 4040;
-
-
+const cookieParser = require('cookie-parser'); 
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true}));
 
-// templating engine
+// run express Class and wrap it in app instance
+const app = express();
+
+// tune middlewares
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser())
+
 app.set('view engine', 'ejs');
 
 
@@ -31,7 +36,8 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  let tempVar = {urls: urlDB};
+  const username = req.cookies["username"]
+  let tempVar = {urls: urlDB, username};
   res.render('urls_index', tempVar)
 })
 
@@ -93,6 +99,16 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls')
 })
 
+
+// USER REGISTRATION AND LOGIN
+
+app.post('/login', (req,res) => {
+  console.log(cookieParser);
+  console.log(req.body.username)
+  const username = req.body.username
+  res.cookie('name', username);
+  res.redirect('/urls')
+})
 
 
 
