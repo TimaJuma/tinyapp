@@ -6,12 +6,14 @@
 
 
 
+//=====================================================================================
 
 // IMPORT ALL MODULES
 const express = require('express');
 
-const PORT = 4040;
+const PORT = 4040 || process.env.PORT;
 const cookieParser = require('cookie-parser'); 
+const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 const { fileLoader } = require('ejs')
 
@@ -22,15 +24,35 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser())
 
+app.use(cookieSession( {
+  name: 'session',
+  keys: ['masya']
+}));
+
 app.set('view engine', 'ejs');
 
 
+//======================================================================================
 
-// url object which will store short ULR versions
+// users storage Object
+const users = {
+  'aaaaaa': {
+    id: "aaaaaa",
+    email: 'tima.xpl@gmail.com',
+    password: 'pass'
+  }
+}
+
+
+
+// ur storage Object
 const urlDB = {
   "xxc2y" : "https://www.lighthouselabs.ca",
   "9m5xk" : "https://www.google.com"
 };
+
+
+//======================================================================================
 
 
 // MAIN FUNCTIONALITY
@@ -48,7 +70,9 @@ app.get("/urls.json", (req, res) => {
 app.get('/urls', (req, res) => {
   const username = req.cookies.name
   console.log(username)
-  let tempVar = {urls: urlDB, username};
+  let tempVar = {
+    urls: urlDB, 
+    username: req.cookies.name};
   res.render('urls_index', tempVar)
 })
 
@@ -111,7 +135,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 })
 
 
-// USER REGISTRATION AND LOGIN
+// USER REGISTRATION AND LOGIN ======================================================
   // store username in cookies
 app.post('/login', (req,res) => {
   const username = req.body.username
@@ -124,6 +148,39 @@ app.post('/logout', (req, res) => {
   res.clearCookie('name')
   res.redirect('/urls');
 })
+
+
+//REGISTER USER
+app.get('/register', (req, res) => {
+  res.render('register');
+})
+
+
+app.post('/register', (req,res) => {
+  //   console.log('response to POST register', req.body)
+  // generate userID and store other parameters in userIds value
+  const userID = generateRandomString();
+  console.log('Cookie session:', req.session.name)
+  // check if user has pased values to form input fields 
+ console.log('---------------')
+
+  const newUser = req.body;
+  if (newUser.email && newUser.password && newUser.password_confirm && newUser.password === newUser.password_confirm) {
+    res.cookie('name', userID);
+    users[userID] = {
+      id: userID,
+      email: newUser.email,
+      password: newUser.password
+    }
+  } else {
+    res.render('register');
+  }
+
+  //   console.log(users);
+  res.redirect('/urls');
+})
+
+
 
 
 //Inform user that the server is on and listens at particular port
@@ -145,3 +202,13 @@ function generateRandomString() {
   shortUrl += randLetter.charAt(Math.floor(Math.random() * randLetter.length));
   return shortUrl;
 }
+
+
+//LOOKUP EMAIL in users object/DB
+const checkEmail = (email => {
+  for (let user in user) {
+    if (users[user].email === email) {
+      return users[user].id;
+    }
+  }
+})
