@@ -1,9 +1,18 @@
+// toDO:
+// 1. Move helpers function to seperate file
+// 2. clean code from console.logs
+// 3. reorganize routers
+
+
+
+
 // IMPORT ALL MODULES
 const express = require('express');
 
 const PORT = 4040;
 const cookieParser = require('cookie-parser'); 
 const bodyParser = require('body-parser');
+const { fileLoader } = require('ejs')
 
 // run express Class and wrap it in app instance
 const app = express();
@@ -36,7 +45,8 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const username = req.cookies["username"]
+  const username = req.cookies.name
+  console.log(username)
   let tempVar = {urls: urlDB, username};
   res.render('urls_index', tempVar)
 })
@@ -101,15 +111,18 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 
 // USER REGISTRATION AND LOGIN
-
+  // store username in cookies
 app.post('/login', (req,res) => {
-  console.log(cookieParser);
-  console.log(req.body.username)
   const username = req.body.username
   res.cookie('name', username);
   res.redirect('/urls')
 })
 
+// logout and clear username cookie
+app.post('/logout', (req, res) => {
+  res.clearCookie('name')
+  res.redirect('/urls');
+})
 
 
 //Inform user that the server is on and listens at particular port
@@ -119,7 +132,7 @@ app.listen(PORT, ()=>{
 });
 
 
-//========== HELPER FUNCTIONS==========================
+//========== HELPER FUNCTIONS========================== (move to seperate file)
 
 // GENERATE STRING
 // the string will be generated based on listed characters with a length of 6 charaters

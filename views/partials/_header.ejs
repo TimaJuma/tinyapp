@@ -11,12 +11,24 @@
       </div>
     </div>
 
-    <!-- //user login form temporary  -->
+    <!-- check if username stored in cookies  -->
+      <!-- if theres is username logout form will be shown  -->
+    <% if (username) { %>
+    <div id="logout">
+      <form method="POST" action="/logout">
+        <a cclass="nav-item nav-link" href="/urls">Logged in as :<strong> <%= username %> </strong></a>
+        <button style="margin-left: 1em;"  type="submit" class="btn btn-outline-dark">LOGOUT</button>
+      </form>
+    </div>
+
+      <!-- if no username render form with login view  -->
+    <% } else { %>
     <div id="login">
       <form method="POST" action="/login">
         <input class="btn btn-light" type="text" placeholder="Enter your username..." name="username">
         <button type="submit" class="btn btn-primary">LOGIN</button>
       </form>
     </div>
+   <% } %> 
   </nav>
 </header>
