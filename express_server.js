@@ -1,39 +1,36 @@
-// toDO:
-// 1. Move helpers function to seperate file
-// 2. clean code from console.logs
-// 3. reorganize routers
-
-
-
-//=====================================================================================
-
 // IMPORT ALL MODULES
 const express = require('express');
 
-const PORT = 4040 || process.env.PORT;
-const cookieParser = require('cookie-parser'); 
+const PORT =  process.env.PORT || 4040;
+const { fileLoader } = require('ejs')
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
-const { fileLoader } = require('ejs')
+const bcrypt = require('bcryptjs');
+const methodOverride = require('method-override'); 
+
 
 // run express Class and wrap it in app instance
 const app = express();
 
 // tune middlewares
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser())
+app.set('view engine', 'ejs');
 
+app.use(bodyParser.urlencoded( {
+  extended: true
+}));
 app.use(cookieSession( {
   name: 'session',
   keys: ['masya']
 }));
+app.use(methodOverride('_method'));
 
-app.set('view engine', 'ejs');
 
 
 //======================================================================================
 
-// users storage Object
+//SET INITIAL DB/STORAGES
+
+// Object DB to store users, their login details
 const users = {
   'aaaaaa': {
     id: "aaaaaa",
@@ -43,8 +40,7 @@ const users = {
 }
 
 
-
-// ur storage Object
+// Object DB to store URLs and creator/user of URLs
 const urlDB = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -60,7 +56,11 @@ const urlDB = {
 
 // MAIN PAGE
 app.get("/", (req, res) => {
-  res.redirect('/urls');
+  if (req.session.name) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -68,19 +68,22 @@ app.get("/urls.json", (req, res) => {
 });
 
 
-// show 
+// the page MAIN PAGE
 app.get('/urls', (req, res) => {
-  const name = req.cookies.name
-  let tempVar = {
-    urls: urlDB, 
-    name: req.cookies.name};
-  res.render('urls_index', tempVar)
+  const name = req.session.name;
+  const user = users[name];
+  if (user) {
+    let tempVar = {urls: urlsForUsers(name), name:user} //
+    res.render('urls_index', tempVar)
+  } else {
+    res.redirect('/login');
+  }
 })
 
 
-// new URL with submission form
+// render new URL with submission form
 app.get("/urls/new", (req, res) => {
-  let templateVars = { urls: urlDB, name: req.cookies['name'] };
+  let templateVars = { urls: urlDB, name: req.session.name };
   if(!templateVars["name"]){
     res.redirect('/login');
   }
@@ -88,7 +91,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 
-//on form submit via POST
+
+//new URL on form submission via POST
 app.post('/urls', (req, res) => {
   //get longURL from from submitted form and generate shortURL
   const longURL= req.body.longURL;
@@ -96,20 +100,20 @@ app.post('/urls', (req, res) => {
   
   //update URLDB object, where all URLs are stored
   urlDB[shortURL] = {
-    ['longURL'] : longURL
+    ['longURL'] : longURL,
+    ['userID'] : req.session.name
   }
   //console.log(req.body.longURL);
   //console.log(urlDB);
-  // res.send('Ok');
   //redirect to the newly generated shortURL
   //res.redirect(`/urls/${shortURL}`);
-  res.redirect('/urls');
+  res.redirect(`/urls/${shortURL}`);
 })
 
 
 // dynamic URL form URL DB/object
 app.get('/urls/:shortURL', (req, res) => {
-  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL], name: req.cookies.name}
+  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL], name: req.session.name}
   res.render('urls_show', tempVar)
 })
 
@@ -145,7 +149,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 // USER REGISTRATION AND LOGIN ======================================================
 app.get('/login', (req, res) => {
   let tempVar = {
-    name: req.cookies.name};
+    name: req.session.name};
   res.render('urls_login', tempVar)
 })
 
@@ -169,21 +173,18 @@ app.post('/login', (req,res) => {
 
     // when the user input meets the requirments
   } else {
-      res.cookie('name', checkEmail(email));
+      req.session.name = checkEmail(email);
     
       //   console.log(users);
       res.redirect('/urls');
     }
 
-
- // COMMENT TO DELETE
-  res.cookie('name', username);
   res.redirect('/urls')
 })
 
 // logout and clear username cookie
 app.post('/logout', (req, res) => {
-  res.clearCookie('name')
+  req.session = null;
   res.redirect('/login');
 })
 
@@ -191,7 +192,7 @@ app.post('/logout', (req, res) => {
 //REGISTER USER
 app.get('/register', (req, res) => {
   let tempVar = {
-    name: req.cookies.name};
+    name: req.session.name};
   res.render('register', tempVar);
 })
 
@@ -217,9 +218,9 @@ app.post('/register', (req,res) => {
     users[userID] = {
       id: userID,
       email: email,
-      password: password}
+      password: password};
       //update usernam in cookies
-      res.cookie('name', userID);
+      req.session.name = userID;
     
       //   console.log(users);
       res.redirect('/urls');
@@ -260,9 +261,11 @@ const checkEmail = (email => {
 })
 
 
-// URLid
+// RETURN objects of URLs that are linked to specific user 
 const urlsForUsers = (id) => {
-  for (user in users) {
-
+  const userURLs = {}
+  for (user in urlDB) {
+    if (urlDB[user]['userID'] === id) userURLs[user] = urlDB[user]
   }
+  return userURLs;
 } 
