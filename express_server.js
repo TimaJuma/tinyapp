@@ -10,6 +10,9 @@ const salt = bcrypt.genSaltSync(10);
 const methodOverride = require('method-override'); 
 
 
+//IMPORT HELPER FUNCTIONS
+const {generateRandomString} = require('./helpers')
+
 // run express Class and wrap it in app instance
 const app = express();
 
@@ -35,7 +38,7 @@ app.use(methodOverride('_method'));
 const users = {
   'aaaaaa': {
     id: "aaaaaa",
-    email: 'tima.xpl@gmail.com',
+    email: 'tima@gmail.com',
     password: 'pass'
   }
 }
@@ -245,16 +248,7 @@ app.listen(PORT, ()=>{
 
 //========== HELPER FUNCTIONS========================== (move to seperate file)
 
-// GENERATE STRING
-// the string will be generated based on listed characters with a length of 6 charaters
-function generateRandomString() {
-  let shortUrl = "";
-  const length = 6; 
-  let randLetter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < length; i++)
-  shortUrl += randLetter.charAt(Math.floor(Math.random() * randLetter.length));
-  return shortUrl;
-}
+
 
 
 //LOOKUP EMAIL in users object/DB

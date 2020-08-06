@@ -1,15 +1,19 @@
-const b = require('bcryptjs');
+// GENERATE STRING
+// the string will be generated based on listed characters with a length of 6 charaters
 
-const pass = 'aaa';
+const generateRandomString = () => Math.random().toString(16).slice(2,8);
 
-const salt = b.genSaltSync(10);
+//OPT2
+// function generateRandomString() {
+//   let shortUrl = "";
+//   const length = 6; 
+//   let randLetter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//   for (let i = 0; i < length; i++)
+//   shortUrl += randLetter.charAt(Math.floor(Math.random() * randLetter.length));
+//   return shortUrl;
+// }
 
-console.log(salt);
 
-const hash = b.hashSync(pass, salt);
-
-console.log(hash)
-
-const correct = b.compareSync(pass, hash)
-
-console.log(correct)
+module.exports = {
+  generateRandomString
+}
