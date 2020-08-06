@@ -68,18 +68,20 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const username = req.cookies.name
-  console.log(username)
+  const name = req.cookies.name
+  console.log(name)
   let tempVar = {
     urls: urlDB, 
-    username: req.cookies.name};
+    name: req.cookies.name};
   res.render('urls_index', tempVar)
 })
 
 
 // new URL with submission form
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let tempVar = {
+    name: req.cookies.name};
+  res.render("urls_new", tempVar);
 });
 
 
@@ -102,7 +104,7 @@ app.post('/urls', (req, res) => {
 
 // dynamic URL form URL DB/object
 app.get('/urls/:shortURL', (req, res) => {
-  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL]}
+  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL], name: req.cookies.name}
   res.render('urls_show', tempVar)
 })
 
@@ -136,17 +138,23 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 
 // USER REGISTRATION AND LOGIN ======================================================
-  // store username in cookies
-app.post('/login', (req,res) => {
-  const username = req.body.username
-  res.cookie('name', username);
-  res.redirect('/urls')
+app.get('/login', (req, res) => {
+  res.render('urls_login')
 })
+
+
+
+//   // store username in cookies
+// app.post('/login', (req,res) => {
+//   const username = req.body.username
+//   res.cookie('name', username);
+//   res.redirect('/urls')
+// })
 
 // logout and clear username cookie
 app.post('/logout', (req, res) => {
   res.clearCookie('name')
-  res.redirect('/urls');
+  res.redirect('/login');
 })
 
 
@@ -159,25 +167,36 @@ app.get('/register', (req, res) => {
 app.post('/register', (req,res) => {
   //   console.log('response to POST register', req.body)
   // generate userID and store other parameters in userIds value
-  const userID = generateRandomString();
+  
   console.log('Cookie session:', req.session.name)
   // check if user has pased values to form input fields 
- console.log('---------------')
+  console.log('---------------')
+  const {email, password, password_confirm} = req.body
 
-  const newUser = req.body;
-  if (newUser.email && newUser.password && newUser.password_confirm && newUser.password === newUser.password_confirm) {
-    res.cookie('name', userID);
+  //check what has been passed from client side on FORM submit via POST method
+  if (email === "" || password === "" || password_confirm === "") {
+    res.status(400).send("Please fill all the fields");
+    return;
+  } else if (password !== password_confirm) {
+    res.status(400).send("Your password does not match!");
+    return;
+  } else if(checkEmail(email)) {
+    res.status(400).send("This email is already in use");
+    return;
+
+    // when the user input meets the requirments
+  } else {
+    const userID = generateRandomString();
     users[userID] = {
       id: userID,
-      email: newUser.email,
-      password: newUser.password
+      email: email,
+      password: password}
+      //update usernam in cookies
+      res.cookie('name', userID);
+    
+      //   console.log(users);
+      res.redirect('/urls');
     }
-  } else {
-    res.render('register');
-  }
-
-  //   console.log(users);
-  res.redirect('/urls');
 })
 
 
@@ -206,7 +225,7 @@ function generateRandomString() {
 
 //LOOKUP EMAIL in users object/DB
 const checkEmail = (email => {
-  for (let user in user) {
+  for (let user in users) {
     if (users[user].email === email) {
       return users[user].id;
     }

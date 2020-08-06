@@ -13,10 +13,10 @@
 
     <!-- check if username stored in cookies  -->
       <!-- if theres is username logout form will be shown  -->
-    <% if (username) { %>
+    <% if (name) { %>
     <div id="logout">
       <form method="POST" action="/logout">
-        <a cclass="nav-item nav-link" href="/urls">Logged in as :<strong> <%= username %> </strong></a>
+        <a cclass="nav-item nav-link" href="/urls">Logged in as :<strong> <%= name %> </strong></a>
         <button style="margin-left: 1em;"  type="submit" class="btn btn-outline-dark">LOGOUT</button>
       </form>
     </div>
