@@ -2,7 +2,6 @@
 // 1. Move helpers function to seperate file
 // 2. clean code from console.logs
 // 3. reorganize routers
-// 4. login form in / route
 
 
 
@@ -47,9 +46,10 @@ const users = {
 
 // ur storage Object
 const urlDB = {
-  "xxc2y" : "https://www.lighthouselabs.ca",
-  "9m5xk" : "https://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
+
 
 
 //======================================================================================
@@ -67,9 +67,10 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDB);
 });
 
+
+// show 
 app.get('/urls', (req, res) => {
   const name = req.cookies.name
-  console.log(name)
   let tempVar = {
     urls: urlDB, 
     name: req.cookies.name};
@@ -79,9 +80,11 @@ app.get('/urls', (req, res) => {
 
 // new URL with submission form
 app.get("/urls/new", (req, res) => {
-  let tempVar = {
-    name: req.cookies.name};
-  res.render("urls_new", tempVar);
+  let templateVars = { urls: urlDB, name: req.cookies['name'] };
+  if(!templateVars["name"]){
+    res.redirect('/login');
+  }
+  res.render("urls_new", templateVars);
 });
 
 
@@ -92,7 +95,9 @@ app.post('/urls', (req, res) => {
   const shortURL = generateRandomString()
   
   //update URLDB object, where all URLs are stored
-  urlDB[shortURL] = longURL;
+  urlDB[shortURL] = {
+    ['longURL'] : longURL
+  }
   //console.log(req.body.longURL);
   //console.log(urlDB);
   // res.send('Ok');
@@ -123,8 +128,8 @@ app.post('/urls/:id', (req, res) => {
   const shortURL = req.params.id
   const longURL = req.body.longURL
   console.log('longB', longURL)
-  urlDB[shortURL] = longURL;
-  res.redirect(`/urls`);
+  urlDB[shortURL].longURL = longURL;
+  res.redirect(`/`);
 })
 
 
@@ -253,3 +258,11 @@ const checkEmail = (email => {
     }
   }
 })
+
+
+// URLid
+const urlsForUsers = (id) => {
+  for (user in users) {
+
+  }
+} 
