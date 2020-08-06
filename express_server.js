@@ -11,7 +11,7 @@ const methodOverride = require('method-override');
 
 
 //IMPORT HELPER FUNCTIONS
-const {generateRandomString} = require('./helpers')
+const {generateRandomString, checkEmail, urlsForUsers} = require('./helpers')
 
 // run express Class and wrap it in app instance
 const app = express();
@@ -77,7 +77,7 @@ app.get('/urls', (req, res) => {
   const name = req.session.name;
   const user = users[name];
   if (user) {
-    let tempVar = {urls: urlsForUsers(name), name:user} //
+    let tempVar = {urls: urlsForUsers(name, urlDB), name:user} //
     res.render('urls_index', tempVar)
   } else {
     res.redirect('/login');
@@ -171,17 +171,17 @@ app.post('/login', (req,res) => {
   if (email === "" || password === "") {
     res.status(403).send("Please fill all the fields");
     return;
-  } else if(!checkEmail(email)) {
+  } else if(!checkEmail(email, users)) {
     res.status(403).send("Wrong Email");
     return;
 
-  } else if(! bcrypt.compareSync(password, (users[checkEmail(email)].password))) {
+  } else if(! bcrypt.compareSync(password, (users[checkEmail(email, users)].password))) {
     res.status(403).send("Wrong Password");
     return;
 
     // when the user input meets the requirments
   } else {
-      req.session.name = checkEmail(email);
+      req.session.name = checkEmail(email, users);
     
       //   console.log(users);
       res.redirect('/urls');
@@ -216,7 +216,7 @@ app.post('/register', (req,res) => {
   } else if (password !== password_confirm) {
     res.status(400).send("Your password does not match!");
     return;
-  } else if(checkEmail(email)) {
+  } else if(checkEmail(email,users)) {
     res.status(400).send("This email is already in use");
     return;
 
@@ -251,21 +251,6 @@ app.listen(PORT, ()=>{
 
 
 
-//LOOKUP EMAIL in users object/DB
-const checkEmail = (email => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user].id;
-    }
-  }
-})
 
 
-// RETURN objects of URLs that are linked to specific user 
-const urlsForUsers = (id) => {
-  const userURLs = {}
-  for (user in urlDB) {
-    if (urlDB[user]['userID'] === id) userURLs[user] = urlDB[user]
-  }
-  return userURLs;
-} 
+
