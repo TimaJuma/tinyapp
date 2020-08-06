@@ -6,6 +6,7 @@ const { fileLoader } = require('ejs')
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
 const methodOverride = require('method-override'); 
 
 
@@ -83,11 +84,14 @@ app.get('/urls', (req, res) => {
 
 // render new URL with submission form
 app.get("/urls/new", (req, res) => {
-  let templateVars = { urls: urlDB, name: req.session.name };
-  if(!templateVars["name"]){
+  if(!req.session.name){
     res.redirect('/login');
+  } else {
+    const name = req.session.name
+    let templateVars = { urls: urlDB, name: users[name] };
+    res.render("urls_new", templateVars);
   }
-  res.render("urls_new", templateVars);
+  
 });
 
 
@@ -113,7 +117,8 @@ app.post('/urls', (req, res) => {
 
 // dynamic URL form URL DB/object
 app.get('/urls/:shortURL', (req, res) => {
-  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL], name: req.session.name}
+  const name = req.session.name
+  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL], name: users[name] }
   res.render('urls_show', tempVar)
 })
 
@@ -167,7 +172,7 @@ app.post('/login', (req,res) => {
     res.status(403).send("Wrong Email");
     return;
 
-  } else if(users[checkEmail(email)].password !== password) {
+  } else if(! bcrypt.compareSync(password, (users[checkEmail(email)].password))) {
     res.status(403).send("Wrong Password");
     return;
 
@@ -178,13 +183,13 @@ app.post('/login', (req,res) => {
       //   console.log(users);
       res.redirect('/urls');
     }
-
   res.redirect('/urls')
 })
 
 // logout and clear username cookie
 app.post('/logout', (req, res) => {
   req.session = null;
+  console.log('logout users', users)
   res.redirect('/login');
 })
 
@@ -215,14 +220,15 @@ app.post('/register', (req,res) => {
     // when the user input meets the requirments
   } else {
     const userID = generateRandomString();
+    const hash =  bcrypt.hashSync(password, salt);
     users[userID] = {
       id: userID,
       email: email,
-      password: password};
+      password: hash};
       //update usernam in cookies
       req.session.name = userID;
     
-      //   console.log(users);
+      console.log(users);
       res.redirect('/urls');
     }
 })
