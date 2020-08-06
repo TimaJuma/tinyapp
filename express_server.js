@@ -139,17 +139,42 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // USER REGISTRATION AND LOGIN ======================================================
 app.get('/login', (req, res) => {
-  res.render('urls_login')
+  let tempVar = {
+    name: req.cookies.name};
+  res.render('urls_login', tempVar)
 })
 
 
 
-//   // store username in cookies
-// app.post('/login', (req,res) => {
-//   const username = req.body.username
-//   res.cookie('name', username);
-//   res.redirect('/urls')
-// })
+  // store username in cookies
+app.post('/login', (req,res) => {
+  const {email, password} = req.body
+
+  //check what has been passed from client side on FORM submit via POST method
+  if (email === "" || password === "") {
+    res.status(403).send("Please fill all the fields");
+    return;
+  } else if(!checkEmail(email)) {
+    res.status(403).send("Wrong Email");
+    return;
+
+  } else if(users[checkEmail(email)].password !== password) {
+    res.status(403).send("Wrong Password");
+    return;
+
+    // when the user input meets the requirments
+  } else {
+      res.cookie('name', checkEmail(email));
+    
+      //   console.log(users);
+      res.redirect('/urls');
+    }
+
+
+
+  res.cookie('name', username);
+  res.redirect('/urls')
+})
 
 // logout and clear username cookie
 app.post('/logout', (req, res) => {
@@ -160,17 +185,14 @@ app.post('/logout', (req, res) => {
 
 //REGISTER USER
 app.get('/register', (req, res) => {
-  res.render('register');
+  let tempVar = {
+    name: req.cookies.name};
+  res.render('register', tempVar);
 })
 
 
 app.post('/register', (req,res) => {
-  //   console.log('response to POST register', req.body)
-  // generate userID and store other parameters in userIds value
-  
-  console.log('Cookie session:', req.session.name)
-  // check if user has pased values to form input fields 
-  console.log('---------------')
+  // check if user has passed values to forms input fields 
   const {email, password, password_confirm} = req.body
 
   //check what has been passed from client side on FORM submit via POST method
