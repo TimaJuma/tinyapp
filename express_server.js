@@ -9,6 +9,8 @@ const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 const methodOverride = require('method-override'); 
 
+const alert = require('alert');
+
 
 //IMPORT HELPER FUNCTIONS
 const {generateRandomString, checkEmail, urlsForUsers} = require('./helpers')
@@ -81,6 +83,7 @@ app.get('/urls', (req, res) => {
     res.render('urls_index', tempVar)
   } else {
     res.redirect('/login');
+    alert('PLease LOGIN first');
   }
 })
 
@@ -110,38 +113,56 @@ app.post('/urls', (req, res) => {
     ['longURL'] : longURL,
     ['userID'] : req.session.name
   }
-  //console.log(req.body.longURL);
-  //console.log(urlDB);
-  //redirect to the newly generated shortURL
-  //res.redirect(`/urls/${shortURL}`);
+
   res.redirect(`/urls/${shortURL}`);
 })
 
 
 // dynamic URL form URL DB/object
-app.get('/urls/:shortURL', (req, res) => {
-  const name = req.session.name
-  let tempVar = {shortURL : req.params.shortURL, longURL : urlDB[req.params.shortURL], name: users[name] }
-  res.render('urls_show', tempVar)
+app.get('/urls/:id', (req, res) => {
+  if(!req.session.name){
+    res.render('error', {errorMsg: 'Page not found', num: 4});
+  } else if (!urlDB[req.params.id]) {
+    res.render('error', {errorMsg: 'There is no such URL', num: 4})
+  } else if (urlDB[req.params.id]['userID'] !== req.session.name){
+    res.render('error', {errorMsg: 'You dont own this URL', num: 3});
+  } else{
+    const name = req.session.name
+    let tempVar = {shortURL : req.params.id, longURL : urlDB[req.params.id]['longURL'], name: users[name] }
+    res.render('urls_show', tempVar)
+  }
+  
 })
 
 
 // when short URL requested, redirect user to actual long URL/site
-app.get("/u/:shortURL", (req,res) => {
-  const longURL = urlDB[req.params.shortURL]
-  console.log(longURL);
-  res.redirect(longURL);
+app.get("/u/:id", (req,res) => {
+  if(!req.session.name){
+    res.redirect('/login');
+    alert('You should login my friend again!!!')
+  } else {
+    const longURL = urlDB[req.params.id]['longURL'];
+    res.redirect(longURL);
+  }
+ 
 })
 
 
 
 // handle POST request to UPDATE longURL by redirecting to dedicated URL info page
 app.post('/urls/:id', (req, res) => {
-  const shortURL = req.params.id
-  const longURL = req.body.longURL
-  console.log('longB', longURL)
-  urlDB[shortURL].longURL = longURL;
-  res.redirect(`/`);
+  if(!req.session.name){
+    res.redirect('/login');
+    alert('You should login first to EDIT URL!!!')
+  } else if (urlDB[req.params.id]['userID'] !== req.session.name) {
+    res.render('error', {errorMsg: 'You dont own this URL', num: 3});
+  } else {
+    const shortURL = req.params.id
+    const longURL = req.body.longURL
+    urlDB[shortURL].longURL = longURL;
+    res.redirect(`/urls`);
+  }
+  
 })
 
 
