@@ -243,6 +243,11 @@ app.post('/register', (req,res) => {
 
 
 
+app.get('*', (req, res) => {
+  res.render('error', {errorMsg: 'Page not found', num: 4});
+})
+
+
 
 //Inform user that the server is on and listens at particular port
 console.log('Will listen to PORT');
