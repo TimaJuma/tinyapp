@@ -156,9 +156,14 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // USER REGISTRATION AND LOGIN ======================================================
 app.get('/login', (req, res) => {
-  let tempVar = {
-    name: req.session.name};
-  res.render('urls_login', tempVar)
+  if (req.session.name) {
+    res.redirect('/urls')
+  } else {
+    let tempVar = {
+      name: req.session.name};
+    res.render('urls_login', tempVar)
+  }
+  
 })
 
 
@@ -244,9 +249,6 @@ console.log('Will listen to PORT');
 app.listen(PORT, ()=>{
   console.log(`Now I listen PORT" ${PORT}`);
 });
-
-
-//========== HELPER FUNCTIONS========================== (move to seperate file)
 
 
 

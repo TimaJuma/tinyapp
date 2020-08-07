@@ -5,7 +5,7 @@
   "main": "express_server.js",
   "scripts": {
     "start": "./node_modules/.bin/nodemon -L express_server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,8 @@
     "method-override": "^3.0.0"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.1",
     "nodemon": "^2.0.4"
   }
 }
